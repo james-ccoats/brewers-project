@@ -1,9 +1,10 @@
 # Finding contract value for X
 library(tidyverse)
+library(ggplot2)
 
 set.seed(101)
+#cut down on n_sim to reduce run time. 10,000 yields similar to 1,000,000 with signifcantly less run time.
 n_sim <- 1000000
-
 seasons <- 2026:2033
 war_proj <- c(3.2, 3.5, 3.7, 3.4, 3.2, 3.0, 2.8, 2.6)
 
@@ -82,4 +83,19 @@ solve_X <- function(){
 }
 breakeven <- solve_X()
 print(breakeven)
+
+plot_df <- data.frame(ytoy_net_value, guaranteed_net)
+
+plot_df_long <- plot_df %>%
+  pivot_longer(cols = everything(), names_to = "contract", values_to = "net_value")
+
+ggplot(plot_df_long, aes(x = net_value, fill = contract)) +
+  geom_vline(aes(xintercept = mean(ytoy_net_value)), color = "blue", linetype = "dotted", linewidth = 1) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribution of Net Values",
+    x = "Net Value ($ millions)",
+    y = "Density"
+  ) +
+  theme_minimal()
 
