@@ -99,3 +99,32 @@ ggplot(plot_df_long, aes(x = net_value, fill = contract)) +
   ) +
   theme_minimal()
 
+breakeven_curve <- function(){
+  X_values <- seq(0, 30, by = 0.5)
+  
+  results <- sapply(X_values, function(X){
+    guaranteed_sims <- replicate(n_sim, sim_guarantee(X), simplify = FALSE)
+    guaranteed_war <- sapply(guaranteed_sims, function(x) x$war)
+    guaranteed_costs <- sapply(guaranteed_sims, function(x) x$cost)
+    mean(guaranteed_war * dollars_per_war - guaranteed_costs)
+  })
+  
+  data.frame(X = X_values, mean_net = results)
+}
+
+curve_df <- breakeven_curve()
+
+ggplot(curve_df, aes(x = X, y = mean_net)) +
+  geom_line(size = 1.2, color = "steelblue") +
+  geom_hline(yintercept = ytoy_mean_net, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = breakeven, linetype = "dotted", color = "darkgreen") +
+  annotate("text", x = breakeven + 1, y = ytoy_mean_net + 5,
+           label = paste0("Breakeven X = ", round(breakeven, 2), "M"),
+           color = "darkgreen", fontface = "bold", hjust = 0) +
+  labs(
+    title = "Breakeven Contract Value (X)",
+    x = "Additional Year Salary (X, in $ millions)",
+    y = "Expected Net Value ($ millions)"
+  ) +
+  theme_minimal(base_size = 14)
+
