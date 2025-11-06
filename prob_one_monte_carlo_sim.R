@@ -34,7 +34,7 @@ inning_simulation <- function(p){
   bases = c(FALSE, FALSE, FALSE)
   index <- 1
   
-  while (outs < 3){
+  while (outs < 3 && runs < 3){
     prob <- get_batter_probs(index, p)
     outcome <- sample(c("SO", "S", "HR"), size = 1, prob = prob)
     
@@ -48,6 +48,7 @@ inning_simulation <- function(p){
       runs <- runs + sum(bases) + 1
       bases <- c(FALSE, FALSE, FALSE)
     }
+    if (runs >= 3) break
     index <- index + 1
     if (index > 9) index <- 1
   }
@@ -64,7 +65,7 @@ distance <- function(p){
 }
 
 solution <- uniroot(distance, lower = 0, upper = 0.9, tol = 0.001)
-print(solution$root) #probability is ~0.3809306
+print(solution$root) #probability is ~0.3811623
 
 p_vals <- seq(0, 0.9, by = 0.1)
 walkoff_probs <- sapply(p_vals, walkoff_estimation)
@@ -77,12 +78,12 @@ plot_data <- data.frame(
 #graph of p function
 ggplot(plot_data, aes(x = p, y = walkoff_prob)) +
   geom_line(color = "black") +
-  geom_hline(yintercept = 0.2, color = "red", linetype = "dashed", size = 1) +  # target
-  geom_vline(xintercept = solution$root, color = "blue", linetype = "dashed", size = 1) +  # solution
+  geom_hline(yintercept = 0.2, color = "red", linetype = "dashed", size = 0.5) +  # target
+  geom_vline(xintercept = solution$root, color = "blue", linetype = "dashed", size = 0.5) +  # solution
   geom_point(aes(x = solution$root, y = 0.2), color = "darkgreen", size = 3) + # solution point
   labs(
     title = "Single vs. Walk off Probability Using Monte Carlo Sim",
-    x = "Single Probability p (Batters 4 & 5)",
+    x = "p (Single Probability)",
     y = "Estimated Walk-off Probability"
   ) +
   theme_minimal(base_size = 14)
