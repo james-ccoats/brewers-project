@@ -95,7 +95,10 @@ ytoy_sims <- replicate(n_sim, sim_yty(), simplify = FALSE)
 ytoy_costs <- sapply(ytoy_sims, function(x) x$cost)
 ytoy_war <- sapply(ytoy_sims, function(x) x$war)
 ytoy_net <- ytoy_war * value_per_war - ytoy_costs
+ytoy_years <- sapply(ytoy_sims, function(x) x$years_played)
 ytoy_mean_net <- mean(ytoy_net)
+ytoy_mean_years <- mean(ytoy_years)
+print(ytoy_mean_years)
 
 #solve for X
 solve_X <- function(){
@@ -136,6 +139,17 @@ ggplot(plot_df_long, aes(x = net_value, fill = contract)) +
     y = "Density"
   ) +
   theme_minimal()
+
+sd_ytoy <- sd(ytoy_net_value)
+sd_guaranteed <- sd(guaranteed_net)
+
+percentiles_ytoy <- quantile(ytoy_net_value, probs = c(0.05, 0.95))
+percentiles_guaranteed <- quantile(guaranteed_net, probs = c(0.05, 0.95))
+
+sd_ytoy
+sd_guaranteed
+percentiles_ytoy
+percentiles_guaranteed
 
 #create breakeven curve
 breakeven_curve <- function(){
